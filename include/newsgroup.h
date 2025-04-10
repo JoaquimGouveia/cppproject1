@@ -1,4 +1,5 @@
-#pragma once
+#ifndef NEWSGROUP_H
+#define NEWSGROUP_H
 #include "article.h"
 #include <map>
 #include <string>
@@ -28,3 +29,6 @@ public:
     Article* getArticle(const std::string& title);
 
     std::vector<std::pair<int, std::string>> listArticles() const;
+
+};
+#endif
