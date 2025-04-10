@@ -2,6 +2,7 @@
 #include "connection.h"
 #include "connectionclosedexception.h"
 #include "messagehandler.h"
+#include "protocol.h"
 #include <string>
 
 using std::string;
@@ -9,6 +10,7 @@ using std::cin;
 using std::cout;
 using std::cerr;
 using std::endl;
+using std::shared_ptr;
 
 /* Command codes, client -> server */
 /*
@@ -116,11 +118,11 @@ void list_articles(MessageHandler& messageHandler) {
     if (code == static_cast<int>(Protocol::ANS_LIST_ART)) {
         int ack_code = messageHandler.recvCode();
         if (ack_code == static_cast<int>(Protocol::ANS_ACK)) {
-            int num_articles = messageHandler.recvIntParameter()
+            int num_articles = messageHandler.recvIntParameter();
             for (int i = 0; i < num_articles; ++i) {
                 int article_id = messageHandler.recvIntParameter();
                 cout << "Article ID: " << article_id << endl;
-                int article_name = messageHandler.recvStringParameter();
+                string article_name = messageHandler.recvStringParameter();
                 cout << "Article Name: " << article_name << endl;
             }
         } else if (ack_code == static_cast<int>(Protocol::ANS_NAK)) {
@@ -191,7 +193,7 @@ void delete_article(MessageHandler& messageHandler) {
     int code = messageHandler.recvCode();
     if (code == static_cast<int>(Protocol::ANS_DELETE_ART)) {
         int ack_code = messageHandler.recvCode();
-        if (ack_code == sttatic_cast<int>(Protocol::ANS_ACK)) {
+        if (ack_code == static_cast<int>(Protocol::ANS_ACK)) {
             cout << "Article deleted successfully." << endl;
         } else {
             int error_code = messageHandler.recvCode();
@@ -211,7 +213,7 @@ void delete_article(MessageHandler& messageHandler) {
 }
 
 void get_article(MessageHandler& messageHandler) {
-    messaegHandler.sendCode(static_cast<int>(Protocol::COM_GET_ART));
+    messageHandler.sendCode(static_cast<int>(Protocol::COM_GET_ART));
     int ng_id;
     cout << "Enter newsgroup ID to get article: ";
     cin >> ng_id;
@@ -291,13 +293,14 @@ int app(MessageHandler messageHandler) {
             }
         } catch (ConnectionClosedException& e) {
             TODO: // Handle connection closed exception
+            return 0;
         }
     }
     return 0;
 }
 
 
-Connection init(int argc, char* argv[]) {
+shared_ptr<Connection> init(int argc, char* argv[]) {
     if (argc != 3) {
         cerr << "Usage: myclient host-name port-number" << endl;
         exit(1);
@@ -313,19 +316,20 @@ Connection init(int argc, char* argv[]) {
     }
 
     // Establish a connection to the server using the provided host and port
-    Connection connection(argv[1], port);
-    if (!connection.isConnected()) {
+    auto connection = std::make_shared<Connection>(argv[1], port);
+    cout << "Trying to connect to host: " << argv[1] << " on port: " << port << endl;
+    if (!connection->isConnected()) {
         cerr << "Connection attempt failed" << endl;
         exit(3);
     }
+
     return connection;
 }
 
 int main (int argc, char* argv[])
 {
-    Connection conn = init(argc, argv);
-    shared_ptr<Connection> connection = std::make_shared<Connection>(conn);
-    MessageHandler messageHandler(connection);
+    shared_ptr<Connection> conn = init(argc, argv);
+    MessageHandler messageHandler(conn);
     int result = app(messageHandler);
     return result;
 }

@@ -1,0 +1,12 @@
+# Object files
+*.o
+*.d
+
+# Static/Shared libraries
+lib/
+*.a
+*.so
+
+# Build output
+myclient
+myserver
