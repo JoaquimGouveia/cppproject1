@@ -1,6 +1,7 @@
 #include "database_memory.h"
 #include <vector>
 #include <iostream>
+#include "article.h"
 
 using namespace std;
 
@@ -62,5 +63,24 @@ Article* database_memory::get_article(int group_id, int article_id) const{
         return group.getArticle(article_id);
     }catch(const std::out_of_range& oor){
         return nullptr;
+    }
+}
+
+bool database_memory::delete_article(int group_id, int article_id){
+    try {
+        auto& group = groups.at(group_id);
+        return group.deleteArticle(article_id);
+    } catch (const std::out_of_range& oor) {
+        return false;
+    }
+}
+
+
+bool database_memory::get_newsgroup(int groupid){
+    try {
+        auto& group = groups.at(group_id);
+        return true;
+    } catch (const std::out_of_range& oor) {
+        return false;
     }
 }

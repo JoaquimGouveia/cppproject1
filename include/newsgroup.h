@@ -25,8 +25,8 @@ public:
     bool deleteArticle(int articleId);
     bool deleteArticle(const std::string& title);
 
-    Article* getArticle(int articleId);
-    Article* getArticle(const std::string& title);
+    const Article* getArticle(int articleId) const;
+    const Article* getArticle(const std::string& title) const;
 
     std::vector<std::pair<int, std::string>> listArticles() const;
 
