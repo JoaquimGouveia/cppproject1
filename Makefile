@@ -30,7 +30,7 @@ all: lib/libclientserver.a
 
 lib/libclientserver.a: src/connection.o src/server.o src/messagehandler.o
 	mkdir -p lib
-	ar rv lib/libclientserver.a  src/connection.o src/server.o src/messagehandler.o
+	ar rv lib/libclientserver.a  src/connection.o src/server.o src/messagehandler.o src/
 	ranlib lib/libclientserver.a
 
 # Phony targets

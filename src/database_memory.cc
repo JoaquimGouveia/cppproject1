@@ -5,16 +5,15 @@
 
 using namespace std;
 
-database_memory::database_memory(){};
+database_memory::database_memory(){}
 
-database_memory::~database_memory(){};
-
-vector<Newsgroup> database_memory::list_newsgroup() const{
+vector<Newsgroup> database_memory::list_newsgroups() const{
     vector<Newsgroup> list;
     list.reserve(groups.size());
     for(const auto& [id, group] : groups){
         list.push_back(group);
     }
+    return list;
 }
 
 bool database_memory::create_newsgroup(string group_name){
@@ -57,7 +56,7 @@ vector<pair<int, string>> database_memory::list_articles(int group_id) const{
     }
 }
 
-Article* database_memory::get_article(int group_id, int article_id) const{
+const Article* database_memory::get_article(int group_id, int article_id) const{
     try{
         const auto& group = groups.at(group_id);
         return group.getArticle(article_id);

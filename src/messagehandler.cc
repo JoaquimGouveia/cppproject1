@@ -4,6 +4,7 @@
 
 #include "connectionclosedexception.h"
 #include <string>
+#include <iostream>
 
 using namespace std;
 
@@ -15,7 +16,9 @@ void MessageHandler::sendByte(int code) {
 }
 
 int MessageHandler::recvByte() {
-    return static_cast<int>(connection->read());
+    int code = static_cast<int>(connection->read());
+    std::cout << "Received byte: " << code << std::endl;
+    return code;
 }
 
 void MessageHandler::sendCode(int code) {
@@ -68,6 +71,7 @@ string MessageHandler:: recvStringParameter() {
     int code = recvCode();
     if (code != static_cast<int>(Protocol::PAR_STRING)) {
         // Look into creating new exceptions
+        std::cout << "Code: " << code << std::endl;
         throw ConnectionClosedException();
     }
     int length = recvInt();

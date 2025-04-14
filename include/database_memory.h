@@ -14,7 +14,7 @@ class database_memory: public database_interface{
 
         ~database_memory() = default;
 
-        std::vector<Newsgroup> list_newsgroup() const;
+        std::vector<Newsgroup> list_newsgroups() const;
 
         bool create_newsgroup(std::string group_name);
 
@@ -24,7 +24,7 @@ class database_memory: public database_interface{
 
         std::vector<std::pair<int, std::string>> list_articles(int group_id) const;
 
-        Article* get_article(int group_id, int article_id) const;
+        const Article* get_article(int group_id, int article_id) const;
 
         bool delete_article(int group_id, int article_id);
 
@@ -32,6 +32,6 @@ class database_memory: public database_interface{
 
         private:
             int group_id = 1;
-            map<int, Newsgroup> groups;
+            std::map<int, Newsgroup> groups;
 };
 #endif

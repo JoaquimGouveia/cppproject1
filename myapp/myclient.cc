@@ -55,6 +55,7 @@ void list_newsgroups(MessageHandler& messageHandler) {
 }
 
 void create_newsgroup(MessageHandler& messageHandler) {
+    messageHandler.sendCode(static_cast<int>(Protocol::COM_CREATE_NG));
     string newsgroup_name;
     cout << "Enter newsgroup name: ";
     cin >> newsgroup_name; // Should we check if the name is valid?

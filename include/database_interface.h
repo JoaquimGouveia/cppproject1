@@ -18,9 +18,9 @@ class database_interface{
 
         virtual bool create_article(int group_id, std::string title, std::string author, std::string text) = 0;
 
-        virtual std::vector<pair<int, std::string>> list_articles(int group_id) const = 0;
+        virtual std::vector<std::pair<int, std::string>> list_articles(int group_id) const = 0;
 
-        virtual Article* get_article(int group_id, int article_id) const = 0;
+        virtual const Article* get_article(int group_id, int article_id) const = 0;
 
         virtual bool delete_article(int group_id, int article_id) = 0;
 

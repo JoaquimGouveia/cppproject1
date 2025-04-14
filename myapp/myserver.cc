@@ -4,6 +4,7 @@
 #include "connectionclosedexception.h"
 #include "database_interface.h"
 #include "messagehandler.h"
+#include "database_memory.h"
 #include "protocol.h"
 
 using std::cout;
@@ -29,7 +30,7 @@ void get_article(MessageHandler& msg, database_interface& db) {
             msg.sendCode(static_cast<int>(Protocol::ERR_NG_DOES_NOT_EXIST));
     }
                     
-    Article* article = db.get_article(newsgroupsid, articlesid);
+    const Article* article = db.get_article(newsgroupsid, articlesid);
 
     if(article != nullptr){
             msg.sendCode(static_cast<int>(Protocol::ANS_ACK));
@@ -125,7 +126,7 @@ void list_articles(MessageHandler& msg, database_interface& db) {
             
             for (const auto& [id, article] : articles) {
                     msg.sendIntParameter(id);
-                    msg.sendStringParameter(article.getTitle());
+                    msg.sendStringParameter(article);
             }
                     
     }else{
@@ -164,8 +165,9 @@ void delete_newsgroup(MessageHandler& msg, database_interface& db) {
 }
 
 void create_newsgroup(MessageHandler& msg, database_interface& db) {
+    std::cout << "Newsgroup name: " << std::endl;
     std::string newsgroupName = msg.recvStringParameter();
-    
+    std::cout << "hello" << std::endl;
     //Checks for COM_END
     int end = msg.recvCode();
     if (end != static_cast<int>(Protocol::COM_END)) {
@@ -295,6 +297,7 @@ void serve_one(Server& server, database_interface& db)
 int main(int argc, char* argv[])        
 {
         auto server = init(argc, argv);
+        auto db = database_memory();
         while (true) {
             serve_one(server, db);
         }

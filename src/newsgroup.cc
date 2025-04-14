@@ -38,7 +38,7 @@ bool Newsgroup::deleteArticle(const std::string& title) {
     return false;
 }
 
-Article* Newsgroup::getArticle(int articleId) {
+const Article* Newsgroup::getArticle(int articleId) const {
     auto it = articles.find(articleId);
     if (it != articles.end()) {
         return &it->second;
@@ -46,7 +46,7 @@ Article* Newsgroup::getArticle(int articleId) {
     return nullptr;
 }
 
-Article* Newsgroup::getArticle(const std::string& title) {
+const Article* Newsgroup::getArticle(const std::string& title) const {
     for (auto& [id, article] : articles) {
         if (article.getTitle() == title) {
             return &article;

@@ -1,53 +1,50 @@
-# Define the compiler and the linker. The linker must be defined since
-# the implicit rule for linking uses CC as the linker. g++ can be
-# changed to clang++.
+# Compiler setup
 CXX = g++
 CC  = $(CXX)
 
-# Generate dependencies in *.d files
-DEPFLAGS = -MT $@ -MMD -MP -MF $*.d
+DEPFLAGS  = -MT $@ -MMD -MP -MF $*.d
 
-# Define preprocessor, compiler, and linker flags. Uncomment the # lines
-# if you use clang++ and wish to use libc++ instead of GNU's libstdc++.
-# -g is for debugging.
 CPPFLAGS  = -I../include
-CXXFLAGS =  -O2 -Wall -Wextra -pedantic-errors -Wold-style-cast
-CXXFLAGS += -std=c++17
-CXXFLAGS += -g
-CXXFLAGS += $(DEPFLAGS)
+CXXFLAGS  = -O2 -Wall -Wextra -pedantic-errors -Wold-style-cast
+CXXFLAGS += -std=c++17 -g $(DEPFLAGS)
 LDFLAGS   = -g -L../lib
-#CPPFLAGS += -stdlib=libc++
-#CXXFLAGS += -stdlib=libc++
-#LDFLAGS +=  -stdlib=libc++
+LDLIBS    = -lclientserver
 
-# Libraries
-LDLIBS = -lclientserver
-
-# Targets
+# Executables
 PROGS = myclient myserver
 
+# Source files for each program
+MYCLIENT_SRCS = myclient.cc
+MYSERVER_SRCS = myserver.cc ../src/article.cc ../src/newsgroup.cc ../src/database_memory.cc
+
+# Object files
+MYCLIENT_OBJS = $(MYCLIENT_SRCS:.cc=.o)
+MYSERVER_OBJS = $(MYSERVER_SRCS:.cc=.o)
+
+# Default target
 all: $(PROGS)
 
-# Targets rely on implicit rules for compiling and linking
-# The dependency on libclientserver.a is not defined.
-myserver: myserver.o
-myclient: myclient.o
+# Build rules
+myclient: $(MYCLIENT_OBJS)
+	$(CXX) $(LDFLAGS) -o $@ $^ $(LDLIBS)
 
-SRC = $(wildcard *.cc)
+myserver: $(MYSERVER_OBJS)
+	$(CXX) $(LDFLAGS) -o $@ $^ $(LDLIBS)
+
+# Compilation rule (with dep generation)
+%.o: %.cc
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $< -o $@
 
 # Phony targets
 .PHONY: all clean distclean
 
-# Standard clean
 clean:
-	-rm -f $(SRC:.cc=.o) $(PROGS)
-
+	-rm -f *.o ../src/*.o $(PROGS)
 
 distclean: clean
-	-rm $(SRC:.cc=.d)
-	-rm -r $(addsuffix .dSym,$(PROGS)) # for cleaning on Macs
+	-rm -f *.d ../src/*.d
+	-rm -r $(addsuffix .dSYM,$(PROGS)) # for Mac users
 
-
-
-# Include the *.d files
--include $(SRC:.cc=.d)
+# Include dependencies
+-include *.d
+-include ../src/*.d

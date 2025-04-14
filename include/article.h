@@ -9,6 +9,7 @@ private:
     std::string content;
 
 public:
+    Article() = default;
     Article(const std::string& title,
             const std::string& author,
             const std::string& content);
