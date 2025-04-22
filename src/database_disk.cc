@@ -8,11 +8,11 @@
 
 using namespace std;
 
-database_disk::database_disk() : id_uses(1000, false) {
+database_disk::database_disk() : id_uses(1000000, false) {
     vector<Newsgroup> list = list_newsgroups();
 
     // Initialize the id_uses vector and newsgroup names based on existing newsgroups
-    newsgroup_names.resize(1000, "");
+    newsgroup_names.resize(1000000, "");
     for (const auto& group : list) {
         int id = group.getId();
         id_uses[id] = true; // Mark the newsgroup as existing
@@ -39,7 +39,6 @@ vector<Newsgroup> database_disk::list_newsgroups() const{
 
 bool database_disk::create_newsgroup(string group_name){
     auto newsgroups = list_newsgroups();
-    std::cout << "Creating newsgroup: " << group_name << endl;
     for (const auto& group : newsgroups) {
         if (group.getName() == group_name) {
             return false; // Newsgroup already exists
@@ -92,7 +91,7 @@ bool database_disk::create_article(int group_id, string title, string author, st
     // Write title, author, and text to the file 
     ofstream article_file(article_path);
     if (!article_file) return false; // Check if the file opened successfully
-    article_file << title << '\n' << author << '\n' << text << '\n';
+    article_file << title << '\n' << author << '\n' << text << '\n'; // Write title, author, and text to the file
     article_file.close(); // Close the file
 
     return true; // Article created successfully
@@ -134,13 +133,24 @@ const std::optional<Article> database_disk::get_article(int group_id, int articl
         return std::nullopt; // Article not found
     }
 
-    string title, author, text, line;
+    string title, author, text;
     getline(article_file, title); // Read the title from the file
     getline(article_file, author); // Read the author from the file
+
+    // Read the rest of the file as the article body
+    vector<string> body_lines;
+    string line;
     while (getline(article_file, line)) {
-        text += line + '\n'; // Read the text from the file
+        body_lines.push_back(line); // Append each line to the body
     }
     article_file.close(); // Close the file
+
+    for (size_t i = 0; i < body_lines.size(); ++i) {
+        text += body_lines[i]; // Concatenate the lines to form the article body
+        if (i != body_lines.size() - 1) {
+            text += '\n'; // Add a newline character between lines
+        }
+    }
 
     return Article(title, author, text); // Return the article object
 }

@@ -170,6 +170,9 @@ void create_article(MessageHandler& messageHandler) {
         if (line.empty()) break; // Stop reading when an empty line is entered
         article_body += line + "\n"; // Append the line to the article body
     }
+    if (!article_body.empty() && article_body.back() == '\n') {
+        article_body.pop_back(); // Remove the last newline character
+    }
     messageHandler.sendStringParameter(article_body);
     messageHandler.sendCode(static_cast<int>(Protocol::COM_END));
 

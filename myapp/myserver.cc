@@ -9,6 +9,7 @@
 #include "protocol.h"
 
 using std::cout;
+using std::cin;
 using std::cerr;
 using std::endl;
 
@@ -28,19 +29,19 @@ void get_article(MessageHandler& msg, database_interface& db) {
 
     bool newsgroupFound = db.newsgroup_exists(newsgroupsid);
     if(!newsgroupFound){
-            msg.sendCode(static_cast<int>(Protocol::ERR_NG_DOES_NOT_EXIST));
-    }
-                    
-    const std::optional<Article> article = db.get_article(newsgroupsid, articlesid);
-
-    if(article){
-            msg.sendCode(static_cast<int>(Protocol::ANS_ACK));
-            msg.sendStringParameter(article->getTitle());
-            msg.sendStringParameter(article->getAuthor());
-            msg.sendStringParameter(article->getContent());
-
-    }else{
-            msg.sendCode(static_cast<int>(Protocol::ERR_ART_DOES_NOT_EXIST));
+        msg.sendCode(static_cast<int>(Protocol::ANS_NAK));
+        msg.sendCode(static_cast<int>(Protocol::ERR_NG_DOES_NOT_EXIST));
+    } else {
+        const std::optional<Article> article = db.get_article(newsgroupsid, articlesid);
+        if (article) {
+                msg.sendCode(static_cast<int>(Protocol::ANS_ACK));
+                msg.sendStringParameter(article->getTitle());
+                msg.sendStringParameter(article->getAuthor());
+                msg.sendStringParameter(article->getContent());
+        } else {
+                msg.sendCode(static_cast<int>(Protocol::ANS_NAK));
+                msg.sendCode(static_cast<int>(Protocol::ERR_ART_DOES_NOT_EXIST));
+        }
     }
     //Last byte
     msg.sendCode(static_cast<int>(Protocol::ANS_END));
@@ -60,17 +61,21 @@ void delete_article(MessageHandler& msg, database_interface& db) {
     //First byte
     msg.sendCode(static_cast<int>(Protocol::ANS_DELETE_ART));
 
+    bool newsgroupFound = db.newsgroup_exists(newsgroupsid);
+    if(!newsgroupFound){
+        msg.sendCode(static_cast<int>(Protocol::ANS_NAK));
+        msg.sendCode(static_cast<int>(Protocol::ERR_NG_DOES_NOT_EXIST));
+        msg.sendCode(static_cast<int>(Protocol::ANS_END));
+        return;
+    }
+
+
     bool deleted = db.delete_article(newsgroupsid, articlesid);
     if(deleted){
             msg.sendCode(static_cast<int>(Protocol::ANS_ACK));
     }else{
             msg.sendCode(static_cast<int>(Protocol::ANS_NAK));
-            bool newsgroupFound = db.newsgroup_exists(newsgroupsid);
-            if(!newsgroupFound){
-                    msg.sendCode(static_cast<int>(Protocol::ERR_NG_DOES_NOT_EXIST));
-            }else{
-                    msg.sendCode(static_cast<int>(Protocol::ERR_ART_DOES_NOT_EXIST));
-            }
+            msg.sendCode(static_cast<int>(Protocol::ERR_ART_DOES_NOT_EXIST));
     }
 
     //Last byte
@@ -166,9 +171,7 @@ void delete_newsgroup(MessageHandler& msg, database_interface& db) {
 }
 
 void create_newsgroup(MessageHandler& msg, database_interface& db) {
-    std::cout << "Newsgroup name: " << std::endl;
     std::string newsgroupName = msg.recvStringParameter();
-    std::cout << "hello" << std::endl;
     //Checks for COM_END
     int end = msg.recvCode();
     if (end != static_cast<int>(Protocol::COM_END)) {
@@ -186,7 +189,6 @@ void create_newsgroup(MessageHandler& msg, database_interface& db) {
     }else{ 
         msg.sendCode(static_cast<int>(Protocol::ANS_NAK));
         msg.sendCode(static_cast<int>(Protocol::ERR_NG_ALREADY_EXISTS));
-
     }
 
     //Last byte
@@ -297,9 +299,25 @@ void serve_one(Server& server, database_interface& db)
 int main(int argc, char* argv[])        
 {
         auto server = init(argc, argv);
-        auto db = database_disk();
+        std::unique_ptr<database_interface> db; // pointer to abstract base class
+
+        int choice;
+        cout << "Choose database type: 1 for memory, 2 for disk" << endl;
+        cin >> choice;
+        while (choice != 1 && choice != 2) {
+            cout << "Invalid choice. Please enter 1 for memory or 2 for disk." << endl;
+            cin >> choice;
+        }
+    
+        if (choice == 1) {
+            db = std::make_unique<database_memory>();
+        } else {
+            db = std::make_unique<database_disk>();
+        }
+        cout << "Server is running..." << endl;
+        cout << "Press Ctrl+C to stop the server." << endl;
         while (true) {
-            serve_one(server, db);
+            serve_one(server, *db); // dereference to pass by reference
         }
         return 0;
 } //main
