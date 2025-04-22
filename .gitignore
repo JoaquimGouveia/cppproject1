@@ -7,6 +7,10 @@ lib/
 *.a
 *.so
 
+# Database directories and files (only keep the root folder itself)
+src/root/*
+!src/root/.gitkeep
+
 # Build output
 myclient
 myserver

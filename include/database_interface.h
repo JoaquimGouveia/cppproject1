@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include <optional>
 #include "article.h"
 #include "newsgroup.h"
 
@@ -20,11 +21,11 @@ class database_interface{
 
         virtual std::vector<std::pair<int, std::string>> list_articles(int group_id) const = 0;
 
-        virtual const Article* get_article(int group_id, int article_id) const = 0;
+        virtual const std::optional<Article> get_article(int group_id, int article_id) const = 0;
 
         virtual bool delete_article(int group_id, int article_id) = 0;
 
-        virtual bool get_newsgroup(int groupid) = 0;
+        virtual bool newsgroup_exists(int groupid) = 0;
 };
 
 #endif

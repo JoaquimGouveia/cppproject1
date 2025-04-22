@@ -38,21 +38,21 @@ bool Newsgroup::deleteArticle(const std::string& title) {
     return false;
 }
 
-const Article* Newsgroup::getArticle(int articleId) const {
+const std::optional<Article> Newsgroup::getArticle(int articleId) const {
     auto it = articles.find(articleId);
     if (it != articles.end()) {
-        return &it->second;
+        return it->second;
     }
-    return nullptr;
+    return std::nullopt;
 }
 
-const Article* Newsgroup::getArticle(const std::string& title) const {
+const std::optional<Article> Newsgroup::getArticle(const std::string& title) const {
     for (auto& [id, article] : articles) {
         if (article.getTitle() == title) {
-            return &article;
+            return article;
         }
     }
-    return nullptr;
+    return std::nullopt;
 }
 
 std::vector<std::pair<int, std::string>> Newsgroup::listArticles() const {

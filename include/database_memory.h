@@ -24,11 +24,11 @@ class database_memory: public database_interface{
 
         std::vector<std::pair<int, std::string>> list_articles(int group_id) const;
 
-        const Article* get_article(int group_id, int article_id) const;
+        const std::optional<Article> get_article(int group_id, int article_id) const;
 
         bool delete_article(int group_id, int article_id);
 
-        bool get_newsgroup(int groupid);
+        bool newsgroup_exists(int groupid);
 
         private:
             int group_id = 1;

@@ -144,22 +144,35 @@ void list_articles(MessageHandler& messageHandler) {
 void create_article(MessageHandler& messageHandler) {
     messageHandler.sendCode(static_cast<int>(Protocol::COM_CREATE_ART));
     int ng_id;
+    string ng_name, article_name, article_author, article_body;
+
+    // Retrieve newsgroup ID from user
     cout << "Enter newsgroup ID to create article: ";
     cin >> ng_id;
-    messageHandler.sendIntParameter(ng_id);
-    string article_name;
+    messageHandler.sendIntParameter(ng_id); // We should have a check for validity here
+
+    // Retrieve article name from user
     cout << "Enter article name: ";
-    cin >> article_name;
+    cin >> article_name; 
     messageHandler.sendStringParameter(article_name);
-    string article_author;
+
+    // Retrieve article author from user
     cout << "Enter article author: ";
     cin >> article_author;
     messageHandler.sendStringParameter(article_author);
-    string article_body;
+    
+    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // Clear the input buffer before reading the article body
+    // Retrieve article body from user
     cout << "Enter article body: ";
-    cin >> article_body;
+    while (true) {
+        string line;
+        std::getline(cin, line);
+        if (line.empty()) break; // Stop reading when an empty line is entered
+        article_body += line + "\n"; // Append the line to the article body
+    }
     messageHandler.sendStringParameter(article_body);
     messageHandler.sendCode(static_cast<int>(Protocol::COM_END));
+
     int code = messageHandler.recvCode();
     if (code == static_cast<int>(Protocol::ANS_CREATE_ART)) {
         int ack_code = messageHandler.recvCode();

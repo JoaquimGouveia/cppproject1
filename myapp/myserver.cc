@@ -5,6 +5,7 @@
 #include "database_interface.h"
 #include "messagehandler.h"
 #include "database_memory.h"
+#include "database_disk.h"
 #include "protocol.h"
 
 using std::cout;
@@ -25,14 +26,14 @@ void get_article(MessageHandler& msg, database_interface& db) {
     //First byte
     msg.sendCode(static_cast<int>(Protocol::ANS_GET_ART));
 
-    bool newsgroupFound = db.get_newsgroup(newsgroupsid);
+    bool newsgroupFound = db.newsgroup_exists(newsgroupsid);
     if(!newsgroupFound){
             msg.sendCode(static_cast<int>(Protocol::ERR_NG_DOES_NOT_EXIST));
     }
                     
-    const Article* article = db.get_article(newsgroupsid, articlesid);
+    const std::optional<Article> article = db.get_article(newsgroupsid, articlesid);
 
-    if(article != nullptr){
+    if(article){
             msg.sendCode(static_cast<int>(Protocol::ANS_ACK));
             msg.sendStringParameter(article->getTitle());
             msg.sendStringParameter(article->getAuthor());
@@ -64,7 +65,7 @@ void delete_article(MessageHandler& msg, database_interface& db) {
             msg.sendCode(static_cast<int>(Protocol::ANS_ACK));
     }else{
             msg.sendCode(static_cast<int>(Protocol::ANS_NAK));
-            bool newsgroupFound = db.get_newsgroup(newsgroupsid);
+            bool newsgroupFound = db.newsgroup_exists(newsgroupsid);
             if(!newsgroupFound){
                     msg.sendCode(static_cast<int>(Protocol::ERR_NG_DOES_NOT_EXIST));
             }else{
@@ -117,7 +118,7 @@ void list_articles(MessageHandler& msg, database_interface& db) {
     //First byte 
     msg.sendCode(static_cast<int>(Protocol::ANS_LIST_ART));
 
-    bool newsgroupFound = db.get_newsgroup(newsgroupsid);
+    bool newsgroupFound = db.newsgroup_exists(newsgroupsid);
     if(newsgroupFound){
             auto articles = db.list_articles(newsgroupsid);
             msg.sendCode(static_cast<int>(Protocol::ANS_ACK));
@@ -171,21 +172,20 @@ void create_newsgroup(MessageHandler& msg, database_interface& db) {
     //Checks for COM_END
     int end = msg.recvCode();
     if (end != static_cast<int>(Protocol::COM_END)) {
-            cerr << "Expected COM_END after COM_LIST_NG" << endl;
-    return;
+        cerr << "Expected COM_END after COM_LIST_NG" << endl;
+        return;
     }
     
     //First byte 
     msg.sendCode(static_cast<int>(Protocol::ANS_CREATE_NG));
-
     //Second and potentially third byte (if name already exits)
     bool success = db.create_newsgroup(newsgroupName);
     
     if(success){ 
-            msg.sendCode(static_cast<int>(Protocol::ANS_ACK)); //creates the newsgroup
+        msg.sendCode(static_cast<int>(Protocol::ANS_ACK)); //creates the newsgroup
     }else{ 
-            msg.sendCode(static_cast<int>(Protocol::ANS_NAK));
-            msg.sendCode(static_cast<int>(Protocol::ERR_NG_ALREADY_EXISTS));
+        msg.sendCode(static_cast<int>(Protocol::ANS_NAK));
+        msg.sendCode(static_cast<int>(Protocol::ERR_NG_ALREADY_EXISTS));
 
     }
 
@@ -297,7 +297,7 @@ void serve_one(Server& server, database_interface& db)
 int main(int argc, char* argv[])        
 {
         auto server = init(argc, argv);
-        auto db = database_memory();
+        auto db = database_disk();
         while (true) {
             serve_one(server, db);
         }

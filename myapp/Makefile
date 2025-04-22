@@ -15,7 +15,7 @@ PROGS = myclient myserver
 
 # Source files for each program
 MYCLIENT_SRCS = myclient.cc
-MYSERVER_SRCS = myserver.cc ../src/article.cc ../src/newsgroup.cc ../src/database_memory.cc
+MYSERVER_SRCS = myserver.cc ../src/article.cc ../src/newsgroup.cc ../src/database_memory.cc ../src/database_disk.cc
 
 # Object files
 MYCLIENT_OBJS = $(MYCLIENT_SRCS:.cc=.o)

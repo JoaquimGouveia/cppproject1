@@ -12,12 +12,13 @@ MessageHandler::MessageHandler(std::shared_ptr<Connection> conn)
         : connection(std::move(conn)){}
 
 void MessageHandler::sendByte(int code) {
+    //std::cout << "Sending byte: " << code << std::endl;
     connection->write(static_cast<unsigned char>(code));
 }
 
 int MessageHandler::recvByte() {
     int code = static_cast<int>(connection->read());
-    std::cout << "Received byte: " << code << std::endl;
+    //std::cout << "Received byte: " << code << std::endl;
     return code;
 }
 

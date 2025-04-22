@@ -56,12 +56,12 @@ vector<pair<int, string>> database_memory::list_articles(int group_id) const{
     }
 }
 
-const Article* database_memory::get_article(int group_id, int article_id) const{
+const std::optional<Article> database_memory::get_article(int group_id, int article_id) const{
     try{
         const auto& group = groups.at(group_id);
         return group.getArticle(article_id);
     }catch(const std::out_of_range& oor){
-        return nullptr;
+        return std::nullopt; // Return nullopt if the group or article is not found
     }
 }
 
@@ -75,7 +75,7 @@ bool database_memory::delete_article(int group_id, int article_id){
 }
 
 
-bool database_memory::get_newsgroup(int groupid){
+bool database_memory::newsgroup_exists(int group_id){
     try {
         auto& group = groups.at(group_id);
         return true;
