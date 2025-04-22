@@ -22,8 +22,10 @@ database_disk::database_disk() : id_uses(1000, false) {
 
 vector<Newsgroup> database_disk::list_newsgroups() const{
     vector<Newsgroup> list;
-    std::cout << "Listing newsgroups..." << endl;
     for (const auto& dir : filesystem::directory_iterator(root_path)) {
+        if (!dir.is_directory()) {
+            continue; // Skip non-directories like .gitkeep
+        }
         string newsgroup = dir.path().filename().string();
         // The name of the directory will be <ID>_<NewsgroupName>
         auto separator_pos = newsgroup.find('_');
@@ -32,7 +34,6 @@ vector<Newsgroup> database_disk::list_newsgroups() const{
         Newsgroup group(id, name);
         list.push_back(group);
     }
-    std::cout << "Found " << list.size() << " newsgroups." << endl;
     return list;
 }
 
