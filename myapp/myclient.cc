@@ -309,7 +309,7 @@ int app(MessageHandler messageHandler) {
                     break;
             }
         } catch (ConnectionClosedException& e) {
-            TODO: // Handle connection closed exception
+            cout << "Connection closed by server." << endl;
             return 0;
         }
     }
@@ -350,5 +350,3 @@ int main (int argc, char* argv[])
     int result = app(messageHandler);
     return result;
 }
-
-// SHOULD I MAKE SURE ALL INPUT IS VALID BEFORE SENDING ANYTHING TO THE SERVER????????
