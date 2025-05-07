@@ -282,7 +282,6 @@ void serve_one(Server& server, database_interface& db)
 {
         auto conn = server.waitForActivity();
         if (conn != nullptr) {
-                //Inte bestämt hur vi ska välja/hantera databasen!
                 try {
                     process_command(conn, db);
                 } catch (ConnectionClosedException&) {
